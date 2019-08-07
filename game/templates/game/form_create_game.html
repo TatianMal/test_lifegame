@@ -11,27 +11,24 @@
     <form action="" method="post">
     {% csrf_token %}
         <h1>Настройки игры по желанию</h1>
-        <div class="setting">
-            <label for="round">Кол-во раундов в игре</label>
-            <div>
-                <input type="range" id="round"><span class="count-range">Значение: 5</span>
+        {% for field in form %}
+            <div class="setting">
+                <label>Кол-во раундов в игре</label>
+                <div>
+                    {{ field.as_widget }}
+                    <span class="count-range">Значение: {{ field.value }}</span>
+                </div>
             </div>
-        </div>
-        <div class="setting">
-            <label for="cell">Кол-во клеток, доступных игроку</label>
-            <div>
-                <input type="range" id="cell"><span class="count-range">Значение: 7</span>
-            </div>
-        </div>
-        <div class="setting">
-            <label for="gen">Кол-во поколений в раунде</label>
-            <div>
-                <input type="range" id="gen"><span class="count-range">Значение: 2</span>
-            </div>
-        </div>
+        <span class="error">{{ field.errors }}</span>
+        {% endfor %}
+
         <div class="buttons">
-            <a class="cancel" href="">Отмена</a>
+            <a class="cancel" href="{% url "game:index" %}">Отмена</a>
             <input type="submit" class="create" value="Создать игру">
         </div>
     </form>
+{% endblock %}
+
+{% block additional_js %}
+    <script src="{% static "js/form_func.js" %}"></script>
 {% endblock %}

@@ -50,8 +50,7 @@
 }
 
 .list-games .join:hover {
-    background-color: #e7ecd8;
-    transition: 0.4s;
+    background-color: #e7ecd8;;
 }
 
 .list-games .join {
@@ -76,4 +75,5 @@
 .details {
     display: none;
     color: #727071;
+    margin-top: 5px;
 }
