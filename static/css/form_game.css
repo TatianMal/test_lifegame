@@ -1,0 +1,48 @@
+h1 { text-align: center }
+
+.setting {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: .5em;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.cancel,
+.create {
+    text-decoration: none;
+    padding: 10px;
+    margin: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: transparent;
+    border-radius: 0.375em;
+    border: 0;
+}
+
+.cancel {
+    color: #a03a50;
+}
+
+.cancel:hover {
+    color: #f33161;
+}
+
+.create {
+    color: #52934c;
+    box-shadow: inset 0 0 0 3px #52934c;
+}
+
+.create:hover {
+    background-color: #e7ecd8;
+}
+
+.count-range {
+    vertical-align: top;
+    font-size: 14px;
+}

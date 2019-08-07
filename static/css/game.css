@@ -1,0 +1,18 @@
+
+#life {
+    margin: 20px;
+}
+.margin_bottom {
+    margin-bottom: 10px;
+}
+#canvas {
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+}
+#canvas div {
+    border-right: 1px solid #616161;
+    border-bottom: 1px solid #616161;
+    float: left;
+    box-sizing: border-box;
+}

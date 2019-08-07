@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Игра Жизнь{% endblock %}
+{% block additional_styles %}
+    <link rel="stylesheet" href="{% static "css/menu.css" %}">
+ {% endblock %}
+
+{% block content %}
+    <h1>Добро пожаловать в игру "Жизнь"</h1>
+
+    <a class="create-game-btn" href="form_game.html">Создать свою игру</a>
+
+    <h2 class="join-game"><span class="games-header">Присоединиться к игре</span></h2>
+    <ul class="list-games">
+        <li class="join">
+            <a href="">
+                <span class="title-btn">Присоединиться</span>
+                <span class="date-game">(13.07.19 14:57)</span>
+                <span class="details">Раунды: 5, Клетки: 2, Поколения: 4</span>
+            </a>
+        </li>
+        <li class="join">
+            <a href="">
+                <span class="title-btn">Присоединиться</span>
+                <span class="date-game">(13.07.19 14:57)</span>
+                <span class="details">Раунды: 5, Клетки: 2, Поколения: 4</span>
+            </a>
+        </li>
+        <li class="join">
+            <a href="">
+                <span class="title-btn">Присоединиться</span>
+                <span class="date-game">(13.07.19 14:57)</span>
+                <span class="details">Раунды: 5, Клетки: 2, Поколения: 4</span>
+            </a>
+        </li>
+        <li>Завершено (Счет: 150:50)</li>
+        <li>Завершено (Счет: 154:230)</li>
+    </ul>
+{% endblock %}
