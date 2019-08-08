@@ -1,6 +1,29 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block title %}Игра Жизнь{% endblock %}
+{% block additional_styles %}
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <link rel="stylesheet" href="{% static "css/game.css" %}">
+{% endblock %}
 {% block content %}
-    Thank you
+    <div id="life">
+        <h1 v-if="gameOver">Игра завершена!</h1>
+        <div class="game_setting">
+            <span class="num-round">Раунд: 4</span><span class="score">Очки: 120</span>
+        </div>
+        <div id="canvas" >
+            <template v-for="row in rows">
+
+
+            </template>
+        </div>
+
+
+    </div>
+    <button class="new-round">Новый раунд</button>
+{% endblock %}
+
+{% block additional_js %}
+    <script src="{% static "js/app.js" %}"></script>
 {% endblock %}

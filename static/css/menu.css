@@ -1,4 +1,4 @@
-.join-game { background: url(div-line.png) repeat-x center center; }
+.join-game { background: url("../image/div-line.png") repeat-x center center; }
 
 .games-header {
     display: inline-block;
@@ -28,6 +28,20 @@
 .create-game-btn:hover {
     background-color: #9d8277;
     transition: 0.4s;
+}
+
+.logout {
+    text-decoration: none;
+    padding: 10px;
+    margin: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: transparent;
+    color: #282828;
+}
+
+.logout:hover {
+    color: #FFF8F7;
 }
 
 .list-games {

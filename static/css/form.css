@@ -8,13 +8,18 @@ h1 { text-align: center }
     padding: .5em;
 }
 
+input {
+    margin-left: 10px;
+}
+
 .buttons {
     display: flex;
     justify-content: center;
 }
 
 .cancel,
-.create {
+.create,
+.login-redirect {
     text-decoration: none;
     padding: 10px;
     margin: 10px;
@@ -42,9 +47,28 @@ h1 { text-align: center }
     background-color: #e7ecd8;
 }
 
+.login-redirect {
+    color: #444444;
+    box-shadow: inset 0 0 0 3px #444444;
+}
+
+.login-redirect:hover {
+    background-color: #FFF8F7;
+}
+
 .count-range {
     vertical-align: top;
     font-size: 14px;
 }
 
 .error { color: darkred; }
+
+.help_text {
+    font-size: 12px;
+}
+
+.help_text ul{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}

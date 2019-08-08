@@ -8,6 +8,11 @@ class CreateGameForm(ModelForm):
     class Meta:
         model = Game
         fields = ["count_round", "count_cell", "count_generation"]
+        labels = {
+            "count_round": "Количество раундов",
+            "count_cell": "Кол-во клеток, доступных игроку",
+            "count_generation": "Кол-во поколений в раунде"
+        }
         widgets = {
             "count_round": NumberInput(attrs={
                 "type": "range",

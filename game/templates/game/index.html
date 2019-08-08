@@ -11,6 +11,11 @@
 
     <a class="create-game-btn" href="{% url "game:create_game" %}">Создать свою игру</a>
 
+    {% if user.is_authenticated %}
+        <a class="logout" href="{% url "account:logout" %}">Выйти</a>
+    {% endif %}
+
+    {{ user }}
     <h2 class="join-game"><span class="games-header">Присоединиться к игре</span></h2>
     <ul class="list-games">
     {% for game in all_games %}

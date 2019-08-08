@@ -3,7 +3,7 @@
 
 {% block title %}Создать игру{% endblock %}
 {% block additional_styles %}
-    <link rel="stylesheet" href="{% static "css/form_game.css" %}" xmlns="http://www.w3.org/1999/html">
+    <link rel="stylesheet" href="{% static "css/form.css" %}" xmlns="http://www.w3.org/1999/html">
     <link rel="stylesheet" href="{% static "css/range.css" %}">
  {% endblock %}
 
@@ -13,7 +13,7 @@
         <h1>Настройки игры по желанию</h1>
         {% for field in form %}
             <div class="setting">
-                <label>Кол-во раундов в игре</label>
+                <label>{{ field.label }}</label>
                 <div>
                     {{ field.as_widget }}
                     <span class="count-range">Значение: {{ field.value }}</span>
