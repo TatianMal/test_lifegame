@@ -13,7 +13,9 @@ import environ
 import os
 
 env = environ.Env(
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    SECRET_KEY=str,
+    REDIS_URL=(str, 'redis://localhost:6379'),
 )
 
 environ.Env.read_env()
@@ -78,6 +80,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'test_game.wsgi.application'
 ASGI_APPLICATION = "test_game.routing.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(env('REDIS_URL'))],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
