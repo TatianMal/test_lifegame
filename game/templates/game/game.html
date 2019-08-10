@@ -7,14 +7,34 @@
     <link rel="stylesheet" href="{% static "css/game.css" %}">
 {% endblock %}
 {% block content %}
+    <script>
+        let gameId = {{ game_id_json }};
+        let gameRound = {{ count_round }};
+        let gameCells = {{ count_cell }};
+        let gameGens = {{ count_generation }};
+    </script>
     <div id="life">
         <h1 v-if="gameOver">Игра завершена!</h1>
-        <div class="game_setting">
+        <div class="game-setting">
             <span class="num-round">Раунд: 4</span><span class="score">Очки: 120</span>
         </div>
 
+        <div v-bind:style="canvasSizeStyles" class="game">
+            <template v-for="row in playerCells">
+                <div v-for="cell in row"
+                     v-bind:style="cellSizeStyles"
+                     v-bind:class="getCellClass(cell)"
+                     v-on:click="checkNewCells(cell)"
+                >
+                </div>
+            </template>
+        </div>
+        <button v-on:click="play" class="new-round">Новый раунд</button>
+    <button v-on:click="completeGame">Продолжить</button>
+    <button v-on:click="clearField">Очистить</button>
+    <button v-on:click="calculateScore">Подсчитать результат</button>
     </div>
-    <button class="new-round">Новый раунд</button>
+
 {% endblock %}
 
 {% block additional_js %}

@@ -1,6 +1,23 @@
-#life { margin: 20px; }
+.game {
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+}
 
-.game_setting {
+.game div {
+    border-right: 1px solid #616161;
+    border-bottom: 1px solid #616161;
+    float: left;
+    box-sizing: border-box;
+}
+
+.cell-living-player { background-color: #759073; }
+
+.cell-died { background-color: white; }
+
+.cell-living-opponent { background-color: #9d8277; }
+
+.game-setting {
     display: flex;
     justify-content: space-between;
 
