@@ -3,7 +3,8 @@
 
 {% block title %}Игра Жизнь{% endblock %}
 {% block additional_styles %}
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+{#    <script src="https://cdn.jsdelivr.net/npm/vue"></script>#}
+    <script src="{% static "js/vue.js" %}"></script>
     <link rel="stylesheet" href="{% static "css/game.css" %}">
 {% endblock %}
 {% block content %}
@@ -12,11 +13,12 @@
         let gameRound = {{ count_round }};
         let gameCells = {{ count_cell }};
         let gameGens = {{ count_generation }};
+        let userId = {{ user.id }};
     </script>
     <div id="life">
         <h1 v-if="gameOver">Игра завершена!</h1>
         <div class="game-setting">
-            <span class="num-round">Раунд: 4</span><span class="score">Очки: 120</span>
+            <span class="num-round">Раунд: 4</span><span class="score">Очки: [[ playerScore ]]</span>
         </div>
 
         <div v-bind:style="canvasSizeStyles" class="game">
@@ -30,8 +32,8 @@
             </template>
         </div>
         <button v-on:click="play" class="new-round">Новый раунд</button>
-    <button v-on:click="completeGame">Продолжить</button>
-    <button v-on:click="clearField">Очистить</button>
+    <button v-on:click="keepGoingGame">Продолжить</button>
+    <button v-on:click="clearField(this.playerCells)">Очистить</button>
     <button v-on:click="calculateScore">Подсчитать результат</button>
     </div>
 

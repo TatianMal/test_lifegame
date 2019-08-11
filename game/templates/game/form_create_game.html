@@ -11,6 +11,7 @@
     <form action="" method="post">
     {% csrf_token %}
         <h1>Настройки игры по желанию</h1>
+        <input type="hidden" name="player_creator" value="{{ user.id }}">
         {% for field in form %}
             <div class="setting">
                 <label>{{ field.label }}</label>
@@ -19,7 +20,7 @@
                     <span class="count-range">Значение: {{ field.value }}</span>
                 </div>
             </div>
-        <span class="error">{{ field.errors }}</span>
+            <span class="error">{{ field.errors }}</span>
         {% endfor %}
 
         <div class="buttons">

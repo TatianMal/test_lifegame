@@ -5,14 +5,18 @@ import json
 
 from game.models import Game
 
+COUNT_READY_USER_TO_NEW_ROUND = 2
+
 
 class GameConsumer(AsyncWebsocketConsumer):
 
     current_turn = None
-    ready_to_update = [False, False]
+    ready_to_update = 0
     next = [False, False]
     player = None
+    final_scores = [False, False]
     opponent = None
+    game_creator_id = None
 
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['game_id']
@@ -27,63 +31,115 @@ class GameConsumer(AsyncWebsocketConsumer):
         check_user = await self.check_game_users()
 
         print("I'm joined")
-        if check_user:
-            await self.accept()
-        else:
-            await self.close(code=403)
+        await self.accept()
+        # if check_user:
+        #     await self.accept()
+        # else:
+        #     await self.close(code=403)
 
     @database_sync_to_async
     def check_game_users(self):
         print("hello")
         game = Game.objects.get(pk=self.game_id)
-        if game.player_creator == self.player.id:
+        self.game_creator_id = game.player_creator.id
+        if game.player_creator.id == self.player.id:
             return True
-        elif game.player_creator != self.player.id and game.player_opponent is None:
+        elif game.player_creator.id != self.player.id and game.player_opponent is None:
             # self.opponent = game.player_creator
             game.player_opponent = User.objects.get(pk=self.player.id)
             game.save()
             return True
         return False
 
-    async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-
+    async def disconnect(self, close_code):
         await self.channel_layer.group_send(
             self.game_group_name,
             {
-                'type': 'chat_message',
-                'message': message
+                'type': 'notice_leave',
             }
         )
+        await self.channel_layer.group_discard(
+                self.game_group_name,
+                self.channel_name
+        )
 
-    # Receive message from room group
-    async def chat_message(self, event):
-        message = event['message']
+    async def receive(self, text_data):
+        data_json = json.loads(text_data)
 
-        # Send message to WebSocket
+        if data_json.get("cell") is not None:
+            cell = data_json.get("cell")
+            print(cell)
+            await self.channel_layer.group_send(
+                self.game_group_name,
+                {
+                    'type': 'send_cell',
+                    'cell': data_json.get("cell"),
+                    'user': data_json.get("user")
+                }
+            )
+
+        elif data_json.get("gen") is not None:
+            gen = data_json.get("gen")
+            await self.channel_layer.group_send(
+                self.game_group_name,
+                {
+                    'type': 'send_gen',
+                    'gen': gen,
+                    'user': data_json.get("user")
+                }
+            )
+
+        elif data_json.get("end_round") is not None:
+            print(self.ready_to_update)
+            if self.ready_to_update == COUNT_READY_USER_TO_NEW_ROUND:  # all users are ready
+                pass
+                # gen = data_json.get("gen")
+                # await self.channel_layer.group_send(
+                #     self.game_group_name,
+                #     {
+                #         'type': 'send_gen',
+                #         'gen': gen,
+                #         'user': data_json.get("user")
+                #     }
+                # )
+            else:
+                self.ready_to_update += 1
+
+        elif data_json.get("score") is not None:
+            score = data_json.get("score")
+            user = data_json.get("user")
+            if any([pl_score for pl_score in self.final_scores]):
+                pass
+            # insert data in game
+
+    @database_sync_to_async
+    def save_game(self):
+        game = Game.objects.get(pk=self.game_id)
+        # add score
+        game.is_played = True
+        game.player_opponent = User.objects.get(pk=self.player.id)
+        game.save()
+
+    async def send_cell(self, event):
+        cell = event['cell']
         await self.send(text_data=json.dumps({
-            'message': message
+            'cell': cell,
+            'user': event['user']
         }))
 
+    async def send_gen(self, event):
+        gen = event['gen']
+        await self.send(text_data=json.dumps({
+            'gen': gen,
+            'user': event['user']
+        }))
 
-# self.game_data = await database_sync_to_async(self.get_game_data)()
-#
-# await self.send(text_data=json.dumps(self.game_data))
-#     def get_game_data(self):
-#         game = Game.objects.get(pk=self.game_id)
-#         settings = {
-#             "count_round": game.count_round,
-#             "count_cell": game.count_cell,
-#             "count_generation": game.count_generation,
-#         }
-#         return settings
+    async def notice_leave(self, event):
+        await self.send(text_data=json.dumps({
+            'game_over': True
+        }))
 
-
-# async def disconnect(self, close_code):
-    #     await self.channel_layer.group_discard(
-    #         self.game_group_name,
-    #         self.channel_name
-    #     )
-    #
-    # Receive message from WebSocket
+    async def save_completed_game(self):
+        await self.send(text_data=json.dumps({
+            'game_over': True
+        }))

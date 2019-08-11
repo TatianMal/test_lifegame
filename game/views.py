@@ -1,5 +1,6 @@
 from django.views.generic import ListView, FormView, DetailView
 from django.http import HttpResponseRedirect
+from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
@@ -33,9 +34,11 @@ class GameCreateView(AuthMixin, FormView):
         return reverse("game:game_full", kwargs={"pk": self.created_game.id})
 
     def form_valid(self, form):
+        user_creator = User.objects.get(pk=self.request.POST["player_creator"])
         curr_game = Game(
             date=timezone.now(),
-            is_played=False
+            is_played=False,
+            player_creator=user_creator
         )
         form = CreateGameForm(self.request.POST, instance=curr_game)
         self.created_game = form.save()

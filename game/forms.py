@@ -1,4 +1,4 @@
-from django.forms import ModelForm, NumberInput
+from django.forms import ModelForm, NumberInput, HiddenInput
 
 from .models import Game, MIN_VALUE, MAX_VALUE_CELL, MAX_VALUE_GEN, MAX_VALUE_ROUND
 
