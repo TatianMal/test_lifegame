@@ -48,16 +48,24 @@ let lifeGame = new Vue({
             this.opponentScore = this.calculateScore(this.opponentCells);
             this.showResult();
 
+            let score1;
+            let score2;
             if (this.checkPlayerIsCreator()) {
-                this.socket.send(
-                    JSON.stringify({
-                        "result": true,
-                        "score_creator": this.playerScore,
-                        "score_opponent": this.opponentScore,
-                    })
-                );
+                score1 = this.playerScore;
+                score2 = this.opponentScore;
+            }
+            else {
+                score1 = this.opponentScore;
+                score2 = this.playerScore;
             }
 
+            this.socket.send(
+                JSON.stringify({
+                    "result": true,
+                    "score_creator": score1,
+                    "score_opponent": score2,
+                })
+            );
             this.socket.send(
                 JSON.stringify({
                     "game_over": true,

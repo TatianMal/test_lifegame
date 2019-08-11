@@ -91,18 +91,18 @@ class GameConsumer(AsyncWebsocketConsumer):
             )
 
         elif data_json.get("result") is not None:
-            score = data_json.get("score")
-            user = data_json.get("user")
-
-            # insert data in game
+            score_creator = data_json.get("score_creator")
+            score_opponent = data_json.get("score_opponent")
+            await self.save_game(score_creator, score_opponent)
 
     @database_sync_to_async
-    def save_game(self):
+    def save_game(self, score_creator, score_opp):
         game = Game.objects.get(pk=self.game_id)
-        # add score
-        game.is_played = True
-        game.player_opponent = User.objects.get(pk=self.player.id)
-        game.save()
+        if not game.is_played:
+            game.score_player1 = score_creator
+            game.score_player2 = score_opp
+            game.is_played = True
+            game.save()
 
     async def send_cell(self, event):
         cell = event["cell"]
