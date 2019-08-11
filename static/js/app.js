@@ -1,7 +1,5 @@
 Vue.config.devtools = true;
 
-socket1 = new WebSocket("ws://" + window.location.host + "/ws/game/" + gameId + "/");
-
 let lifeGame = new Vue({
     el: "#life",
     delimiters: ["[[", "]]"],
@@ -112,9 +110,10 @@ let lifeGame = new Vue({
                     if (cell.status) {
                         this.countNewCell++;
                     }
-                    else {
+                    else if (this.countNewCell > 0) {
                         this.countNewCell--;
                     }
+
                     this.sendOwnCell(cell);
                 }
                 else if (cell.status) {
@@ -238,7 +237,6 @@ let lifeGame = new Vue({
                     }
                     else {
                         clearInterval(lifeGame.timerGameId);
-                        console.log("after end of gen");
                         lifeGame.checkGameOver();
                         if (!lifeGame.gameOver) {
                             lifeGame.sendReadySignal();
@@ -305,6 +303,12 @@ let lifeGame = new Vue({
                 lifeGame.sendReadySignal();
                 lifeGame.counterReadyPlayers++;
             }
+        };
+
+        this.socket.onclose = function (e) {
+             if (e.code === 403) {
+                 lifeGame.gameMessage = "Извините, но игра уже занята, попробуйте другую";
+             }
         };
 
         this.socket.onmessage = function(e) {

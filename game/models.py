@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 MIN_VALUE = 1
 MAX_VALUE_ROUND = 7
-MAX_VALUE_CELL = 20
+MAX_VALUE_CELL = 60
 MAX_VALUE_GEN = 10
 
 
@@ -28,6 +28,7 @@ class Game(models.Model):
         MaxValueValidator(MAX_VALUE_GEN)
     ])
     is_played = models.BooleanField(default=False)
+    is_closed = models.BooleanField(default=False)
     score_player1 = models.PositiveIntegerField(default=0)
     score_player2 = models.PositiveIntegerField(default=0)
     player_creator = models.ForeignKey(

@@ -19,29 +19,27 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.player = self.scope["user"]
         self.game_group_name = "game_%s" % self.game_id
 
-        await self.channel_layer.group_add(
-            self.game_group_name,
-            self.channel_name
-        )
-
         check_user = await self.check_game_users()
 
-        await self.accept()
-        # if check_user:
-        #     await self.accept()
-        # else:
-        #     await self.close(code=403)
+        if check_user:
+            print(self.player)
+            await self.channel_layer.group_add(
+                self.game_group_name,
+                self.channel_name
+            )
+            await self.accept()
+        else:
+            await self.close(code=403)
 
     @database_sync_to_async
     def check_game_users(self):
-        print("hello")
         game = Game.objects.get(pk=self.game_id)
         self.game_creator_id = game.player_creator.id
         if game.player_creator.id == self.player.id:
             return True
         elif game.player_creator.id != self.player.id and game.player_opponent is None:
-            # self.opponent = game.player_creator
             game.player_opponent = User.objects.get(pk=self.player.id)
+            game.is_closed = True
             game.save()
             return True
         return False
