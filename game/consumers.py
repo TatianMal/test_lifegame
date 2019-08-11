@@ -10,18 +10,14 @@ COUNT_READY_USER_TO_NEW_ROUND = 2
 
 class GameConsumer(AsyncWebsocketConsumer):
 
-    current_turn = None
-    ready_to_update = 0
-    next = [False, False]
     player = None
-    final_scores = [False, False]
     opponent = None
     game_creator_id = None
 
     async def connect(self):
-        self.game_id = self.scope['url_route']['kwargs']['game_id']
+        self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
         self.player = self.scope["user"]
-        self.game_group_name = 'game_%s' % self.game_id
+        self.game_group_name = "game_%s" % self.game_id
 
         await self.channel_layer.group_add(
             self.game_group_name,
@@ -30,7 +26,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         check_user = await self.check_game_users()
 
-        print("I'm joined")
         await self.accept()
         # if check_user:
         #     await self.accept()
@@ -55,7 +50,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.game_group_name,
             {
-                'type': 'notice_leave',
+                "type": "notice_leave",
             }
         )
         await self.channel_layer.group_discard(
@@ -67,49 +62,38 @@ class GameConsumer(AsyncWebsocketConsumer):
         data_json = json.loads(text_data)
 
         if data_json.get("cell") is not None:
-            cell = data_json.get("cell")
-            print(cell)
             await self.channel_layer.group_send(
                 self.game_group_name,
                 {
-                    'type': 'send_cell',
-                    'cell': data_json.get("cell"),
-                    'user': data_json.get("user")
+                    "type": "send_cell",
+                    "cell": data_json.get("cell"),
+                    "user": data_json.get("user")
                 }
             )
 
         elif data_json.get("gen") is not None:
-            gen = data_json.get("gen")
             await self.channel_layer.group_send(
                 self.game_group_name,
                 {
-                    'type': 'send_gen',
-                    'gen': gen,
-                    'user': data_json.get("user")
+                    "type": "send_gen",
+                    "gen": data_json.get("gen"),
+                    "user": data_json.get("user")
                 }
             )
 
-        elif data_json.get("end_round") is not None:
-            print(self.ready_to_update)
-            if self.ready_to_update == COUNT_READY_USER_TO_NEW_ROUND:  # all users are ready
-                pass
-                # gen = data_json.get("gen")
-                # await self.channel_layer.group_send(
-                #     self.game_group_name,
-                #     {
-                #         'type': 'send_gen',
-                #         'gen': gen,
-                #         'user': data_json.get("user")
-                #     }
-                # )
-            else:
-                self.ready_to_update += 1
+        elif data_json.get("pl_ready") is not None:
+            await self.channel_layer.group_send(
+                self.game_group_name,
+                {
+                    "type": "notice_ready",
+                    "user": data_json.get("user")
+                }
+            )
 
-        elif data_json.get("score") is not None:
+        elif data_json.get("result") is not None:
             score = data_json.get("score")
             user = data_json.get("user")
-            if any([pl_score for pl_score in self.final_scores]):
-                pass
+
             # insert data in game
 
     @database_sync_to_async
@@ -121,25 +105,28 @@ class GameConsumer(AsyncWebsocketConsumer):
         game.save()
 
     async def send_cell(self, event):
-        cell = event['cell']
+        cell = event["cell"]
         await self.send(text_data=json.dumps({
-            'cell': cell,
-            'user': event['user']
+            "cell": cell,
+            "user": event["user"]
         }))
 
     async def send_gen(self, event):
-        gen = event['gen']
+        gen = event["gen"]
         await self.send(text_data=json.dumps({
-            'gen': gen,
-            'user': event['user']
+            "gen": gen,
+            "user": event["user"]
         }))
 
     async def notice_leave(self, event):
         await self.send(text_data=json.dumps({
-            'game_over': True
+            "game_over": True
         }))
 
-    async def save_completed_game(self):
+    async def notice_ready(self, event):
         await self.send(text_data=json.dumps({
-            'game_over': True
+            "opponent_ready": True,
+            "user": event["user"]
         }))
+
+

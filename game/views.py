@@ -52,8 +52,9 @@ class GameView(AuthMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['game_id_json'] = mark_safe(json.dumps(self.object.pk))
-        context['count_round'] = mark_safe(json.dumps(self.object.count_round))
-        context['count_cell'] = mark_safe(json.dumps(self.object.count_cell))
-        context['count_generation'] = mark_safe(json.dumps(self.object.count_generation))
+        context["game_id_json"] = mark_safe(json.dumps(self.object.pk))
+        context["count_round"] = mark_safe(json.dumps(self.object.count_round))
+        context["count_cell"] = mark_safe(json.dumps(self.object.count_cell))
+        context["count_generation"] = mark_safe(json.dumps(self.object.count_generation))
+        context["game_creator"] = mark_safe(json.dumps(self.object.player_creator.id))
         return context

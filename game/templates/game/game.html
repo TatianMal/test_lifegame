@@ -14,11 +14,14 @@
         let gameCells = {{ count_cell }};
         let gameGens = {{ count_generation }};
         let userId = {{ user.id }};
+        let gameCreatorId = {{ game_creator }};
     </script>
     <div id="life">
         <h1 v-if="gameOver">Игра завершена!</h1>
         <div class="game-setting">
-            <span class="num-round">Раунд: 4</span><span class="score">Очки: [[ playerScore ]]</span>
+            <span class="num-round">Раунд: [[ currRound ]]</span>
+            <span>[[ gameMessage ]]</span>
+            <span class="score">Очки: [[ playerScore ]]</span>
         </div>
 
         <div v-bind:style="canvasSizeStyles" class="game">
@@ -31,10 +34,8 @@
                 </div>
             </template>
         </div>
-        <button v-on:click="play" class="new-round">Новый раунд</button>
-    <button v-on:click="keepGoingGame">Продолжить</button>
-    <button v-on:click="clearField(this.playerCells)">Очистить</button>
-    <button v-on:click="calculateScore">Подсчитать результат</button>
+        <div>[[ counterReadyPlayers ]]</div>
+        <button v-on:click="startPlay" class="new-round">Новый раунд</button>
     </div>
 
 {% endblock %}

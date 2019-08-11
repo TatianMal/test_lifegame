@@ -1,8 +1,10 @@
 Vue.config.devtools = true;
 
+socket1 = new WebSocket("ws://" + window.location.host + "/ws/game/" + gameId + "/");
+
 let lifeGame = new Vue({
-    el: '#life',
-    delimiters: ['[[', ']]'],
+    el: "#life",
+    delimiters: ["[[", "]]"],
     data: {
         gameOver: false,
         canvasSize: 450,
@@ -10,16 +12,21 @@ let lifeGame = new Vue({
         speed: 500,
         countRound: 0,
         countCell: 0,
-        currRound: 1,
+        currRound: 0,
         currGen: 1,
         countNewCell: 0,
         playerScore: 0,
+        opponentScore: 0,
         playerCells: [],
         opponentCells: [],
         playerId: "",
         isUnblockedInterface: false,
-        socket: '',
+        socket: "",
         timerGameId: false,
+        counterReadyPlayers: 1,
+        gameCreatorId: "",
+        gameMessage: "",
+        blockPlayCreator: false,
     },
     computed: {
         canvasSizeStyles: function () {
@@ -37,71 +44,108 @@ let lifeGame = new Vue({
     },
     watch: {
         gameOver: function () {
-            this.calculateScore();
+            this.playerScore = this.calculateScore(this.playerCells);
+            this.opponentScore = this.calculateScore(this.opponentCells);
+            this.showResult();
 
-            //notice players with websocket and calculate result
+            if (this.checkPlayerIsCreator()) {
+                this.socket.send(
+                    JSON.stringify({
+                        "result": true,
+                        "score_creator": this.playerScore,
+                        "score_opponent": this.opponentScore,
+                    })
+                );
+            }
+
+            this.socket.send(
+                JSON.stringify({
+                    "game_over": true,
+                })
+            );
         },
-
     },
     methods: {
-        getCellClass: function(cell) {
-            if (!this.opponentCells[cell.xCoord][cell.yCoord].status) {
-                return cell.status ? 'cell-living-player' : 'cell-died';
+        checkPlayerIsCreator: function() {
+            return this.playerId === this.gameCreatorId;
+        },
+        showResult: function() {
+            if (this.playerScore > this.opponentScore) {
+                this.gameMessage = "Вы выиграли";
             }
-            else /*is_creator*/ {
+            else if (this.playerScore === this.opponentScore) {
+                this.gameMessage = "Ничья";
+            }
+            else {
+                this.gameMessage = "Вы проиграли";
+            }
+
+        },
+        getCellClass: function(cell) {
+            if (!this.opponentCells[cell.yCoord][cell.xCoord].status) {
+                return cell.status ? "cell-living-player" : "cell-died";
+            }
+            else if (this.opponentCells[cell.yCoord][cell.xCoord].status === this.playerCells[cell.yCoord][cell.xCoord].status) {
+                return "cell-living-both";
+            }
+            else {
                 return "cell-living-opponent";
             }
         },
         checkGameOver: function() {
-            if (this.currRound === this.countRound /*|| event when one of players exit game*/ ) {
+            if (this.currRound === this.countRound) {
                 this.gameOver = true;
             }
         },
         checkNewCells: function (cell) {
-            if (this.countNewCell < this.countCell) {
-                cell.status ? cell.status = false : cell.status = true;
-                if (cell.status) {
-                    this.countNewCell++;
+            if (this.isUnblockedInterface){
+                if (this.countNewCell < this.countCell) {
+                    cell.status ? cell.status = false : cell.status = true;
+                    if (cell.status) {
+                        this.countNewCell++;
+                    }
+                    else {
+                        this.countNewCell--;
+                    }
+                    this.sendOwnCell(cell);
                 }
-                else {
+                else if (cell.status) {
+                    //if switch living cell to dead state, when count cell is maximum
+                    cell.status = false;
                     this.countNewCell--;
+                    this.sendOwnCell(cell);
                 }
-                this.sendOwnCell(cell);
-            }
-            else if (cell.status) {
-                //if switch living cell to dead state, when count cell is maximum
-                cell.status = false;
-                this.countNewCell--;
-                this.sendOwnCell(cell);
             }
         },
-        calculateScore: function () {
-            this.playerCells.forEach(function (row) {
+        calculateScore: function (cells) {
+            let result  = 0;
+            cells.forEach(function (row) {
                 row.forEach(function (cell){
                     if (cell.status !== false) {
-                        lifeGame.playerScore++;
+                        result++;
                     }
                 })
             });
+            return result;
         },
         updateOpponentOneCell: function (cell, user) {
             if (user !== this.playerId) {
-                this.opponentCells[cell.xCoord][cell.yCoord].status = cell.status;
+                this.opponentCells[cell.yCoord][cell.xCoord].status = cell.status;
             }
         },
         sendOwnCell: function(cell) {
             this.socket.send(
                 JSON.stringify({
-                    'cell': cell,
-                    'user': this.playerId,
+                    "cell": cell,
+                    "user": this.playerId,
                 })
             );
         },
         sendOwnGen: function(gen) {
             this.socket.send(
                 JSON.stringify({
-                    'gen': gen,
-                    'user': this.playerId,
+                    "gen": gen,
+                    "user": this.playerId,
                 })
             );
         },
@@ -124,8 +168,8 @@ let lifeGame = new Vue({
                 for (let j = 0; j < this.canvasSize / this.cellSize; j++) {
                     cells.push({
                         status: false,
-                        xCoord: i,
-                        yCoord: j,
+                        yCoord: i,
+                        xCoord: j,
                     });
                 }
                 rows.push(cells);
@@ -153,7 +197,7 @@ let lifeGame = new Vue({
                         neighbors += lifeGame.checkLiveNeighbor(bottomRow[j]);
                         neighbors += lifeGame.checkLiveNeighbor(bottomRow[j + 1]);
                     }
-                    let newCell = {status: cell.status, xCoord: i, yCoord: j};
+                    let newCell = {status: cell.status, yCoord: i, xCoord: j};
                     if (!cell.status) {
                         if (neighbors === 3) {
                             newCell.status = true;
@@ -178,21 +222,23 @@ let lifeGame = new Vue({
             return 0;
         },
         play: function () {
-            this.timerGameId = setInterval(function () {
-                if (lifeGame.currGen <= lifeGame.countGen) {
-                    lifeGame.generateNextGen();
-                    lifeGame.currGen++;
-                }
-                else {
-                    clearInterval(lifeGame.timerGameId);
-                    lifeGame.socket.send(
-                        JSON.stringify({
-                            'end_round': true,
-                            'user': this.playerId,
-                        })
-                    );
-                }
-            }, this.speed);
+            if (!this.isUnblockedInterface && !this.blockPlayCreator) {
+                this.timerGameId = setInterval(function () {
+                    if (lifeGame.currGen <= lifeGame.countGen) {
+                        lifeGame.generateNextGen();
+                        lifeGame.currGen++;
+                    }
+                    else {
+                        clearInterval(lifeGame.timerGameId);
+                        console.log("after end of gen");
+                        lifeGame.checkGameOver();
+                        if (!lifeGame.gameOver) {
+                            lifeGame.sendReadySignal();
+                        }
+                    }
+                }, this.speed);
+                this.countNewCell = 0;
+            }
         },
         keepGoingGame: function() {
             this.currRound++;
@@ -206,13 +252,52 @@ let lifeGame = new Vue({
                 })
             })
         },
+        sendReadySignal: function() {
+            this.socket.send(
+                JSON.stringify({
+                    "pl_ready": true,
+                    "user": this.playerId,
+                })
+            );
+        },
+
+        checkUnblockInterface: function() {
+            console.log("are you here unblock");
+            if (this.counterReadyPlayers === 2) {
+                console.log("check unblock");
+                this.isUnblockedInterface = true;
+                this.counterReadyPlayers = 0;
+            }
+        },
+        startPlay: function () {
+            this.sendReadySignal();
+            this.isUnblockedInterface = false;
+            console.log("start play");
+            if (this.checkPlayerIsCreator()) {
+                this.blockPlayCreator = true;
+                console.log("block creator gen");
+            }
+            this.keepGoingGame();
+        }
     },
     created: function() {
-        this.socket = new WebSocket('ws://' + window.location.host + '/ws/game/' + gameId + '/');
+        this.socket = new WebSocket("ws://" + window.location.host + "/ws/game/" + gameId + "/");
         this.countRound = gameRound;
         this.countCell = gameCells;
         this.countGen = gameGens;
         this.playerId = userId;
+        this.gameCreatorId = gameCreatorId;
+
+        if (!this.checkPlayerIsCreator()) {
+            this.counterReadyPlayers = 0;
+        }
+
+        this.socket.onopen = function () {
+             if (!lifeGame.checkPlayerIsCreator()) {
+                lifeGame.sendReadySignal();
+                lifeGame.counterReadyPlayers++;
+            }
+        };
 
         this.socket.onmessage = function(e) {
             let data = JSON.parse(e.data);
@@ -222,6 +307,24 @@ let lifeGame = new Vue({
             }
             else if ("gen" in data) {
                 lifeGame.updateOpponentCells(data["gen"], data["user"]);
+            }
+            else if ("opponent_ready" in data) {
+                if (data["user"] !== lifeGame.playerId) {
+
+                    if (!lifeGame.gameOver) {
+                        console.log(data);
+                        if (lifeGame.blockPlayCreator) {  // if receiver is creator with blocked generator
+                            console.log("unblock creator");
+                            lifeGame.blockPlayCreator = false;
+                            lifeGame.counterReadyPlayers = 1;
+                            lifeGame.play();
+                        }
+                        else {
+                            lifeGame.counterReadyPlayers++;
+                            lifeGame.checkUnblockInterface();
+                        }
+                    }
+                }
             }
             else if ("game_over" in data) {
                 lifeGame.gameOver = data["game_over"];
