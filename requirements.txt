@@ -13,10 +13,13 @@ cryptography==2.7
 daphne==2.3.0
 Django==2.2.3
 django-environ==0.4.5
+django-filter==2.2.0
+djangorestframework==3.11.0
 hiredis==1.0.0
 hyperlink==19.0.0
 idna==2.8
 incremental==17.5.0
+Markdown==3.2.1
 msgpack==0.6.1
 psycopg2==2.8.3
 pycparser==2.19
