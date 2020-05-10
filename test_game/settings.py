@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'game.apps.GameConfig',
     'account.apps.AccountConfig',
     'channels',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
