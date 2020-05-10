@@ -33,13 +33,13 @@ class Game(models.Model):
     score_player2 = models.PositiveIntegerField(default=0)
     player_creator = models.ForeignKey(
         User,
-        on_delete="CASCADE",
+        on_delete=models.CASCADE,
         related_name="game_to_creator",
         default=get_deleted_user
     )
     player_opponent = models.ForeignKey(
         User,
-        on_delete="CASCADE",
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name="game_to_opponent",
