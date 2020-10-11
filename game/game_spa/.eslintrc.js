@@ -8,8 +8,12 @@ module.exports = {
     parser: "babel-eslint"
   },
   rules: {
-    "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
-    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off"
+    "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
+    "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
+    "space-before-function-paren": ["error", "always"],
+    indent: ["error", 2, { SwitchCase: 1 }],
+    "no-case-declarations": "off",
+    "comma-dangle": ["error", "only-multiline"]
   },
   overrides: [
     {
