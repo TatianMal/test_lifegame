@@ -1,5 +1,5 @@
 <template>
-  <div :class="currentClass"></div>
+  <div :class="currentClass" @click="onClick"></div>
 </template>
 
 <script>
@@ -18,17 +18,30 @@ export default {
   components: {
   },
   data () {
-    return {};
+    return {
+      state: undefined,
+      isOwnsCurrentPlayer: this.isActiveCurrentPlayer
+    };
   },
   computed: {
     currentClass () {
-      if (this.isActiveCurrentPlayer && this.isActiveOppositePlayer) return 'cell-living-both'
-      if (!this.isActiveCurrentPlayer && !this.isActiveOppositePlayer) return 'cell-empty'
-      if (this.isActiveCurrentPlayer) return 'cell-living-player'
+      if (this.isOwnsCurrentPlayer && this.isActiveOppositePlayer) return 'cell-living-both'
+      if (!this.isOwnsCurrentPlayer && !this.isActiveOppositePlayer) return 'cell-empty'
+      if (this.isOwnsCurrentPlayer) return 'cell-living-player'
       else return 'cell-living-opponent'
     }
   },
-  methods: {}
+  watch: {
+    isActiveCurrentPlayer () {
+      this.isOwnsCurrentPlayer = this.isActiveCurrentPlayer
+    }
+  },
+  methods: {
+    onClick () {
+      this.isOwnsCurrentPlayer = !this.isOwnsCurrentPlayer
+      this.$emit('input', this.isOwnsCurrentPlayer) // for v-model
+    }
+  }
 };
 </script>
 
